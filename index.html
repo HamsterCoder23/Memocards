@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <header>
+        <h1> Flashcards </h1>
+        <button disabled id="start" onclick="start() , this.disabled=true;" class="button">Start Game</button>
+        <div> - </div>
+        <button disabled id="set4" onclick="setMode(4) , this.disabled=true;" class="button">4 pairs</button>
+        <button disabled id="set8" onclick="setMode(8) , this.disabled=true;" class="button">8 pairs</button>
+        <button disabled id="set12" onclick="setMode(12) , this.disabled=true;" class="button">12 pairs</button>
+    </header>
+
+    <canvas id="canvas"></canvas>
+    <script src="code.js"></script>
+
+    <!-- New entry adder -->
+    <form id="addCard" onsubmit="return false;">
+        <h2>Add a card:</h2>
+        <b>Question: </b>
+        <input type="text" id="userInputQuestion" />
+        <b>Answer: </b>
+        <input type="text" id="userInputAnswer" />
+        <button margin="5px" form="Card" onclick="addCard()"> Add </button>    
+        <button margin="5px" form="Card" onclick="getJSON()"> Get cards code </button>    
+        <button margin="5px" form="Card" onclick="setJSON()"> Set cards code </button>    
+    </form>
+
+    <!-- Display list of entries -->
+    <div class="container">
+        <ul id="display">
+            
+        </ul>
+    </div>
+
+</body>
+</html>
