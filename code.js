@@ -6,7 +6,11 @@ const HEIGHT = 600;
 
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
-var interval
+
+var interval;
+var timer;
+
+var time = 0;
 
 var cards = [];
 var gameCards = [];
@@ -38,6 +42,7 @@ class gameCard {
     }
 }
 
+//Start function
 function start() {
     gameCards = [];
     curPair = "";
@@ -45,7 +50,14 @@ function start() {
     document.getElementById("set4").disabled = true;
     document.getElementById("set8").disabled = true;
     document.getElementById("set12").disabled = true;
-    console.log(mode);
+    time = 0;
+    miniTime = 0;
+    if (interval != null) {
+        clearInterval(interval);
+    }
+    if (timer != null) {
+        clearInterval(timer);
+    }
 
     for (var i = 0; i < mode; i++) {
 
@@ -70,10 +82,42 @@ function start() {
 
     document.getElementById("start").disabled = true;
 
-    interval = setInterval(render, 10);
+    interval = setInterval(update, 10);
+    timer = setInterval(updateTime, 1000);
 }
 
-//Checks for clicks on cards
+//Updates game state
+function update() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    displayTime();
+
+    if (gameCards.length == 0) {
+        clearInterval(timer);
+        context.font = "30px Arial";
+        context.fillStyle = "green";
+        context.textAlign = "center";
+        context.fillText("You win!", WIDTH/2, HEIGHT/2);
+
+        context.font = "24px Arial";
+        context.fillStyle = "black";
+        context.textAlign = "center";
+        context.fillText(Math.floor(time/60) + ":" + time % 60, WIDTH/2, HEIGHT/2 + 30);    
+
+        updateButtons();
+
+        if (mode != 0) {
+            document.getElementById("start").disabled = false;
+        }
+    } else {
+        renderCards();
+        cardsToRender.forEach((gc) => {
+            renderText(gc);
+        });
+    }
+}
+
+//Checks for clicks on game cards
 canvas.addEventListener("click", function (event) {
     var mousePos = getMousePos(canvas, event);
     let x = mousePos[0];
@@ -92,7 +136,6 @@ canvas.addEventListener("click", function (event) {
                     cardsToRender.push(gc);
                     removeCards(gc.id);
                 } else {
-                    //Unflip cards after a few seconds
                     cardsToRender.push(gc);
                 }
                 curPair = -1;
@@ -121,29 +164,7 @@ function getMousePos(canvas, evt) {
     return [evt.clientX - rect.left, evt.clientY - rect.top];
 }
 
-
-//const delay = ms => new Promise(res => setTimeout(res, ms));
-
-//Rendering functions \/
-
-function render() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    if (gameCards.length == 0) {
-        context.font = "12px Arial";
-        context.textAlign = "center";
-        context.fillText("You win!", WIDTH/2, HEIGHT/2);
-        updateButtons();
-        if (mode != 0) {
-            document.getElementById("start").disabled = false;
-        }
-    } else {
-        renderCards();
-        cardsToRender.forEach((gc) => {
-            renderText(gc);
-        });
-    }
-}
-
+//Renders all game cards
 function renderCards() {
     gameCards.forEach((gc) => {
         context.strokeStyle = "black";
@@ -151,8 +172,20 @@ function renderCards() {
     });
 }
 
+//Renders timer
+function displayTime() {
+    context.font = "20px Arial";
+    context.fillText(Math.floor(time/60) + ":" + time % 60, 750, 20);
+}
+
+function updateTime() {
+    time++;
+}
+
+//Renders text of a game card
 function renderText(gc) {
     context.font = "12px Arial";
+    context.fillStyle = "black";
 
     if (gc.text.length > 16) {
         context.textAlign = "left";
@@ -202,10 +235,7 @@ function renderText(gc) {
     
 }
 
-
-
-//Card functions \/
-
+//Assigns each game card a random position
 function randomizeCardsPositions() {
     if (mode == 4) {
         for (var i = 0; i < 8; i++) {
@@ -269,11 +299,23 @@ function randomizeCardsPositions() {
 function addCard() {
     var inputQuestion = document.getElementById("userInputQuestion").value;
     var inputAnswer = document.getElementById("userInputAnswer").value;
-    if (inputAnswer != "" && inputQuestion != "") {
+
+    let add = true;
+
+    cards.forEach((card) => {
+        if (card.question == inputQuestion || card.question == inputAnswer || card.answer == inputQuestion || card.answer == inputAnswer) {
+            add = false;
+        }
+    });
+
+    if (inputAnswer != "" && inputQuestion != "" && add) {
         cards.push(new Card(inputQuestion, inputAnswer));
         displayCards();
         updateButtons();
+    } else {
+        window.alert("Invalid input: empty field or duplicate question/answer");
     }
+
 }
 
 //Refreshes display of cards
@@ -289,7 +331,10 @@ function displayCards() {
 function cardsDelete(index) {
     cards.splice(index, 1);
     displayCards();
-
+    if (cards.length < mode) {
+        mode = 0;
+        document.getElementById("start").disabled = true;
+    }
     updateButtons();
 }
 
@@ -311,18 +356,22 @@ function setJSON() {
     updateButtons();
 }
 
+//Updates buttons based on mo-de and card count
 function updateButtons() {
-    if (mode != 4 && cards.length >= 4) {
-        document.getElementById("set4").disabled = false;
-    }
-    if (mode != 8 && cards.length >= 8) {
-        document.getElementById("set8").disabled = false;
-    }
-    if (mode != 12 && cards.length >= 12) {
-        document.getElementById("set12").disabled = false;
+    if (cards != null) {
+        if (mode != 4 && cards.length >= 4) {
+            document.getElementById("set4").disabled = false;
+        }
+        if (mode != 8 && cards.length >= 8) {
+            document.getElementById("set8").disabled = false;
+        }
+        if (mode != 12 && cards.length >= 12) {
+            document.getElementById("set12").disabled = false;
+        }
     }
 }
 
+//sets mode
 function setMode(x) {
     this.mode = x;
     updateButtons();
