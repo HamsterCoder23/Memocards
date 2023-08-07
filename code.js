@@ -178,6 +178,7 @@ function displayTime() {
     context.fillText(Math.floor(time/60) + ":" + time % 60, 750, 20);
 }
 
+//increases seconds by one
 function updateTime() {
     time++;
 }
@@ -295,7 +296,7 @@ function randomizeCardsPositions() {
 }
 
 
-//Adds a card if inputs aren't empty
+//Adds a card if inputs aren't empty or duplicate
 function addCard() {
     var inputQuestion = document.getElementById("userInputQuestion").value;
     var inputAnswer = document.getElementById("userInputAnswer").value;
@@ -356,7 +357,7 @@ function setJSON() {
     updateButtons();
 }
 
-//Updates buttons based on mo-de and card count
+//Updates buttons based on mode and card count
 function updateButtons() {
     if (cards != null) {
         if (mode != 4 && cards.length >= 4) {
